@@ -1,0 +1,8 @@
+node_modules/
+target/
+__pycache__/
+*.dylib
+*.so
+.claude/
+node_modules/
+target/
