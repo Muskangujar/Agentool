@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCBI E-utilities API Reference</title>
+</head>
+<body>
+
+<h1>NCBI E-utilities REST API</h1>
+
+<p>
+  The Entrez E-utilities are a set of server-side programs that provide a stable
+  interface into the Entrez query and database system at the National Center for
+  Biotechnology Information (NCBI).
+</p>
+
+<p>
+  Base URL: <strong>https://eutils.ncbi.nlm.nih.gov/entrez/eutils/</strong>
+</p>
+
+<hr>
+
+<section id="einfo">
+  <h2>EInfo — Database Statistics</h2>
+  <p>Provides a list of all valid Entrez databases and their statistics.</p>
+  <p>Endpoint: <code>GET /einfo.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>db</code> — target database (optional; omit to list all)</li>
+    <li><code>retmode</code> — output format: <code>json</code> or <code>xml</code></li>
+  </ul>
+  <p>Example:</p>
+  <pre>GET /einfo.fcgi?db=pubmed&amp;retmode=json</pre>
+</section>
+
+<hr>
+
+<section id="esearch">
+  <h2>ESearch — Text Search</h2>
+  <p>Search any Entrez database for a text query and retrieve matching UIDs.</p>
+  <p>Endpoint: <code>GET /esearch.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>term</code> — search term (required)</li>
+    <li><code>retmax</code> — max records to return (default 20)</li>
+    <li><code>usehistory</code> — <code>y</code> to post results to history server</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="esummary">
+  <h2>ESummary — Document Summaries</h2>
+  <p>Returns document summaries for a list of primary IDs.</p>
+  <p>Endpoint: <code>GET /esummary.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>id</code> — comma-delimited list of UIDs (required)</li>
+    <li><code>retmode</code> — output format</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="efetch">
+  <h2>EFetch — Full Records</h2>
+  <p>Returns formatted data records for a list of UIDs.</p>
+  <p>Endpoint: <code>GET /efetch.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>id</code> — comma-delimited list of UIDs (required)</li>
+    <li><code>rettype</code> — retrieval type (e.g. <code>abstract</code>, <code>medline</code>)</li>
+    <li><code>retmode</code> — output format</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="elink">
+  <h2>ELink — Linked Records</h2>
+  <p>Returns UIDs from a target database that are linked to UIDs in a source database.</p>
+  <p>Endpoint: <code>GET /elink.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>dbfrom</code> — source database (required)</li>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>id</code> — comma-delimited list of source UIDs (required)</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="epost">
+  <h2>EPost — Post UIDs to History</h2>
+  <p>Posts a file containing a list of UIDs to the Entrez history server.</p>
+  <p>Endpoint: <code>POST /epost.fcgi</code></p>
+  <p>Parameters (form body):</p>
+  <ul>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>id</code> — comma-delimited list of UIDs (required)</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="egquery">
+  <h2>EGQuery — Global Search</h2>
+  <p>Performs a text search in all Entrez databases and returns the number of hits.</p>
+  <p>Endpoint: <code>GET /egquery.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>term</code> — search term (required)</li>
+  </ul>
+</section>
+
+<hr>
+
+<section id="espell">
+  <h2>ESpell — Spelling Suggestions</h2>
+  <p>Retrieves spelling suggestions for a text query in a given database.</p>
+  <p>Endpoint: <code>GET /espell.fcgi</code></p>
+  <p>Parameters:</p>
+  <ul>
+    <li><code>db</code> — target database (required)</li>
+    <li><code>term</code> — query term (required)</li>
+  </ul>
+</section>
+
+<hr>
+
+<footer>
+  <p>Source: NCBI E-utilities documentation. This page is a test fixture.</p>
+</footer>
+
+</body>
+</html>
