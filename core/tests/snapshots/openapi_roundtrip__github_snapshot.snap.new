@@ -1,0 +1,174 @@
+---
+source: tests/openapi_roundtrip.rs
+assertion_line: 28
+expression: json
+---
+{
+  "tool_id": "github",
+  "version": "1.1.4",
+  "base_url": "https://api.github.com",
+  "auth": {
+    "type": "bearer",
+    "in": "header",
+    "name": "Authorization",
+    "scheme": "Bearer"
+  },
+  "methods": [
+    {
+      "name": "search_repositories",
+      "description": "Find repositories via various criteria.",
+      "http": {
+        "method": "GET",
+        "path": "/search/repositories"
+      },
+      "params": [
+        {
+          "name": "q",
+          "in": "query",
+          "type": "string",
+          "required": true,
+          "description": "The search keywords and qualifiers."
+        },
+        {
+          "name": "sort",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by.",
+          "enum": [
+            "stars",
+            "forks",
+            "help-wanted-issues",
+            "updated"
+          ]
+        },
+        {
+          "name": "order",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100)."
+        },
+        {
+          "name": "page",
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results."
+        }
+      ]
+    },
+    {
+      "name": "get_repository",
+      "description": "The parent and source objects are present when the repository is a fork.",
+      "http": {
+        "method": "GET",
+        "path": "/repos/{owner}/{repo}"
+      },
+      "params": [
+        {
+          "name": "owner",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "repo",
+          "in": "path",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list_repository_issues",
+      "description": "List repository issues",
+      "http": {
+        "method": "GET",
+        "path": "/repos/{owner}/{repo}/issues"
+      },
+      "params": [
+        {
+          "name": "owner",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "repo",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "state",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "enum": [
+            "open",
+            "closed",
+            "all"
+          ]
+        },
+        {
+          "name": "per_page",
+          "in": "query",
+          "type": "integer",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create_issue",
+      "description": "Creates a new issue.",
+      "http": {
+        "method": "POST",
+        "path": "/repos/{owner}/{repo}/issues"
+      },
+      "params": [
+        {
+          "name": "owner",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "repo",
+          "in": "path",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "body",
+          "in": "body",
+          "type": "object",
+          "required": true,
+          "description": "Request body."
+        }
+      ]
+    },
+    {
+      "name": "get_authenticated_user",
+      "description": "Get the authenticated user",
+      "http": {
+        "method": "GET",
+        "path": "/user"
+      }
+    }
+  ],
+  "provenance": {
+    "source": "openapi",
+    "fetched_at": "2026-01-01T00:00:00+00:00"
+  }
+}

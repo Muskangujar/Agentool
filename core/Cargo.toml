@@ -16,7 +16,7 @@ path = "src/bin/agentool_server.rs"
 # ── async runtime + HTTP server ──────────────────────────────────────────────
 tokio          = { version = "1.36", features = ["full"] }
 hyper          = { version = "1.2",  features = ["http1", "http2", "server"] }
-hyper-util     = { version = "0.1",  features = ["tokio"] }
+hyper-util     = { version = "0.1",  features = ["tokio", "server", "server-auto", "http1", "http2"] }
 http-body-util = "0.1"
 tower          = { version = "0.4",  features = ["limit", "timeout", "util"] }
 

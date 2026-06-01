@@ -1,0 +1,142 @@
+---
+source: tests/openapi_roundtrip.rs
+assertion_line: 34
+expression: json
+---
+{
+  "tool_id": "stripe",
+  "version": "2024-04-10",
+  "base_url": "https://api.stripe.com",
+  "auth": {
+    "type": "basic",
+    "in": "header",
+    "name": "Authorization"
+  },
+  "methods": [
+    {
+      "name": "list_charges",
+      "description": "Returns a list of charges you've previously created.",
+      "http": {
+        "method": "GET",
+        "path": "/v1/charges"
+      },
+      "params": [
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "required": false,
+          "description": "A limit on the number of objects to be returned."
+        },
+        {
+          "name": "customer",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only return charges for the customer specified."
+        },
+        {
+          "name": "starting_after",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "A cursor for pagination."
+        }
+      ]
+    },
+    {
+      "name": "create_charge",
+      "description": "Use the Payment Intents API instead.",
+      "http": {
+        "method": "POST",
+        "path": "/v1/charges"
+      },
+      "params": [
+        {
+          "name": "body",
+          "in": "body",
+          "type": "object",
+          "required": true,
+          "description": "Request body."
+        }
+      ]
+    },
+    {
+      "name": "retrieve_charge",
+      "description": "Retrieve a charge",
+      "http": {
+        "method": "GET",
+        "path": "/v1/charges/{charge}"
+      },
+      "params": [
+        {
+          "name": "charge",
+          "in": "path",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list_customers",
+      "description": "List all customers",
+      "http": {
+        "method": "GET",
+        "path": "/v1/customers"
+      },
+      "params": [
+        {
+          "name": "limit",
+          "in": "query",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "name": "email",
+          "in": "query",
+          "type": "string",
+          "required": false,
+          "description": "A filter on the list based on the customer's email field."
+        }
+      ]
+    },
+    {
+      "name": "create_customer",
+      "description": "Create a customer",
+      "http": {
+        "method": "POST",
+        "path": "/v1/customers"
+      },
+      "params": [
+        {
+          "name": "body",
+          "in": "body",
+          "type": "object",
+          "required": false,
+          "description": "Request body."
+        }
+      ]
+    },
+    {
+      "name": "create_payment_intent",
+      "description": "Creates a PaymentIntent object.",
+      "http": {
+        "method": "POST",
+        "path": "/v1/payment_intents"
+      },
+      "params": [
+        {
+          "name": "body",
+          "in": "body",
+          "type": "object",
+          "required": true,
+          "description": "Request body."
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source": "openapi",
+    "fetched_at": "2026-01-01T00:00:00+00:00"
+  }
+}
