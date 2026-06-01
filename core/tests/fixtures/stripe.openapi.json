@@ -1,0 +1,147 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Stripe",
+    "description": "The Stripe REST API.",
+    "version": "2024-04-10"
+  },
+  "servers": [
+    { "url": "https://api.stripe.com" }
+  ],
+  "security": [
+    { "BasicAuth": [] }
+  ],
+  "paths": {
+    "/v1/charges": {
+      "get": {
+        "operationId": "list_charges",
+        "summary": "List all charges",
+        "description": "Returns a list of charges you've previously created.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "A limit on the number of objects to be returned.",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "customer",
+            "in": "query",
+            "required": false,
+            "description": "Only return charges for the customer specified.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "starting_after",
+            "in": "query",
+            "required": false,
+            "description": "A cursor for pagination.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "post": {
+        "operationId": "create_charge",
+        "summary": "Create a charge",
+        "description": "Use the Payment Intents API instead.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/v1/charges/{charge}": {
+      "get": {
+        "operationId": "retrieve_charge",
+        "summary": "Retrieve a charge",
+        "parameters": [
+          {
+            "name": "charge",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/v1/customers": {
+      "get": {
+        "operationId": "list_customers",
+        "summary": "List all customers",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "description": "A filter on the list based on the customer's email field.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      },
+      "post": {
+        "operationId": "create_customer",
+        "summary": "Create a customer",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/v1/payment_intents": {
+      "post": {
+        "operationId": "create_payment_intent",
+        "summary": "Create a PaymentIntent",
+        "description": "Creates a PaymentIntent object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}

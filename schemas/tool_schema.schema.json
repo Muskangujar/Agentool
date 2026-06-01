@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/samvardhan03/agentool/schemas/tool_schema.schema.json",
+  "title": "ToolSchema",
+  "description": "Agentool's internal data model for a wrapped API. Every parser path (OpenAPI 3.x, HTML inference, browser recording) emits exactly one ToolSchema. The MCP server consumes one.",
+  "type": "object",
+  "required": ["tool_id", "version", "base_url", "auth", "methods", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "tool_id": {
+      "type": "string",
+      "description": "Stable machine-readable identifier for this tool (e.g. \"github\", \"stripe\").",
+      "pattern": "^[a-z0-9_-]+$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver string for this schema snapshot.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "base_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Root URL that all method paths are appended to."
+    },
+    "auth": {
+      "$ref": "#/definitions/Auth"
+    },
+    "rate_limit": {
+      "$ref": "#/definitions/RateLimit"
+    },
+    "methods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/Method"
+      },
+      "description": "All callable methods this tool exposes to the agent."
+    },
+    "components": {
+      "type": "object",
+      "description": "Named reusable type definitions. Methods reference these via { \"$ref\": \"#/components/<Name>\" }.",
+      "additionalProperties": true
+    },
+    "provenance": {
+      "$ref": "#/definitions/Provenance"
+    }
+  },
+  "definitions": {
+    "Auth": {
+      "type": "object",
+      "description": "Authentication specification for the upstream API.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["bearer", "api_key", "basic", "none"],
+          "description": "Authentication scheme. \"none\" means no credentials required."
+        },
+        "in": {
+          "type": "string",
+          "enum": ["header", "query"],
+          "description": "Transport location for the credential. Required for bearer, api_key, and basic."
+        },
+        "name": {
+          "type": "string",
+          "description": "Header or query-parameter name that carries the credential (e.g. \"Authorization\", \"X-API-Key\")."
+        },
+        "scheme": {
+          "type": "string",
+          "description": "Value prefix placed before the token. Used only for bearer (e.g. \"Bearer\")."
+        }
+      }
+    },
+    "RateLimit": {
+      "type": "object",
+      "description": "Token-bucket rate-limit applied per tool before each upstream call.",
+      "required": ["rps", "burst"],
+      "additionalProperties": false,
+      "properties": {
+        "rps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Sustained requests per second."
+        },
+        "burst": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum burst capacity above the sustained rate."
+        }
+      }
+    },
+    "Method": {
+      "type": "object",
+      "description": "A single callable operation exposed to the agent as an MCP tool.",
+      "required": ["name", "description", "http"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Snake-case identifier exposed to the agent (e.g. \"search_repositories\").",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable docstring shown to the LLM to explain what this method does."
+        },
+        "http": {
+          "$ref": "#/definitions/HttpSpec"
+        },
+        "params": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Param"
+          },
+          "default": [],
+          "description": "Input parameters the agent must or may supply."
+        },
+        "returns": {
+          "$ref": "#/definitions/ReturnType",
+          "description": "Shape of the successful response value."
+        }
+      }
+    },
+    "HttpSpec": {
+      "type": "object",
+      "description": "The HTTP verb and path that implement this method.",
+      "required": ["method", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+          "description": "HTTP verb."
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path relative to base_url. Path parameters use {param_name} syntax.",
+          "pattern": "^/"
+        }
+      }
+    },
+    "Param": {
+      "type": "object",
+      "description": "A single input parameter for a method.",
+      "required": ["name", "in", "type", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Parameter name as expected by the upstream API."
+        },
+        "in": {
+          "type": "string",
+          "enum": ["query", "header", "path", "body"],
+          "description": "Where in the HTTP request this parameter is placed."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "array", "object"],
+          "description": "JSON-compatible scalar or collection type."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Whether the agent must supply this parameter."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable explanation of what this parameter controls."
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "If present, restricts the parameter value to one of these literal strings."
+        }
+      }
+    },
+    "ReturnType": {
+      "type": "object",
+      "description": "Describes the shape of a method's return value or a nested collection element.",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["object", "array", "string", "integer", "number", "boolean", "null"],
+          "description": "Top-level type of the return value."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReturnField"
+          },
+          "description": "Named fields present when kind is \"object\"."
+        },
+        "items": {
+          "description": "Element type present when kind is \"array\". Either an inline ReturnType or a $ref to components.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/ReturnType"
+            },
+            {
+              "$ref": "#/definitions/ComponentRef"
+            }
+          ]
+        }
+      }
+    },
+    "ReturnField": {
+      "type": "object",
+      "description": "A single named field inside an object return type.",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name as it appears in the JSON response."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "integer", "number", "boolean", "array", "object"],
+          "description": "JSON-compatible scalar or collection type of this field."
+        },
+        "description": {
+          "type": "string"
+        },
+        "items": {
+          "description": "Element type present when type is \"array\". Either an inline ReturnType or a $ref to components.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/ReturnType"
+            },
+            {
+              "$ref": "#/definitions/ComponentRef"
+            }
+          ]
+        }
+      }
+    },
+    "ComponentRef": {
+      "type": "object",
+      "description": "A reference to a named type in the top-level components map.",
+      "required": ["$ref"],
+      "additionalProperties": false,
+      "properties": {
+        "$ref": {
+          "type": "string",
+          "pattern": "^#/components/",
+          "description": "JSON pointer into the components map (e.g. \"#/components/Repository\")."
+        }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "description": "Records how and when this ToolSchema was produced.",
+      "required": ["source", "fetched_at"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["openapi", "html_infer", "browser_record"],
+          "description": "Which parser path produced this schema."
+        },
+        "fetched_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp of when the source was fetched or the recording completed."
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the OpenAPI spec or docs page this schema was derived from. Omitted for browser_record provenance."
+        }
+      }
+    }
+  }
+}
