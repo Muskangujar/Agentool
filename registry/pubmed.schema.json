@@ -1,0 +1,57 @@
+{
+  "tool_id": "pubmed",
+  "version": "0.1.0",
+  "base_url": "https://eutils.ncbi.nlm.nih.gov",
+  "auth": {
+    "auth_type": "api_key",
+    "location": "query",
+    "name": "api_key",
+    "scheme": null
+  },
+  "rate_limit": {
+    "requests_per_second": 3
+  },
+  "methods": [
+    {
+      "name": "esearch",
+      "description": "Search PubMed and return a list of matching PMIDs.",
+      "http": { "method": "GET", "path": "/entrez/eutils/esearch.fcgi" },
+      "params": [
+        { "name": "db",       "type": "string",  "required": true,  "location": "query", "description": "Database name (e.g. pubmed)" },
+        { "name": "term",     "type": "string",  "required": true,  "location": "query", "description": "Search query" },
+        { "name": "retmax",   "type": "integer", "required": false, "location": "query", "description": "Max results to return" },
+        { "name": "retmode",  "type": "string",  "required": false, "location": "query", "description": "Return format: xml or json" }
+      ],
+      "returns": { "type": "object", "description": "Search result with IdList" }
+    },
+    {
+      "name": "efetch",
+      "description": "Fetch full records by PMID.",
+      "http": { "method": "GET", "path": "/entrez/eutils/efetch.fcgi" },
+      "params": [
+        { "name": "db",      "type": "string", "required": true,  "location": "query", "description": "Database name" },
+        { "name": "id",      "type": "string", "required": true,  "location": "query", "description": "Comma-separated PMIDs" },
+        { "name": "rettype", "type": "string", "required": false, "location": "query", "description": "Return type: abstract, full, etc." },
+        { "name": "retmode", "type": "string", "required": false, "location": "query", "description": "Return format: xml or json" }
+      ],
+      "returns": { "type": "object", "description": "Fetched records" }
+    },
+    {
+      "name": "esummary",
+      "description": "Get document summaries for a list of PMIDs.",
+      "http": { "method": "GET", "path": "/entrez/eutils/esummary.fcgi" },
+      "params": [
+        { "name": "db",      "type": "string", "required": true,  "location": "query", "description": "Database name" },
+        { "name": "id",      "type": "string", "required": true,  "location": "query", "description": "Comma-separated PMIDs" },
+        { "name": "retmode", "type": "string", "required": false, "location": "query", "description": "Return format: xml or json" }
+      ],
+      "returns": { "type": "object", "description": "Document summaries" }
+    }
+  ],
+  "components": {},
+  "provenance": {
+    "source": "openapi",
+    "fetched_at": "2026-06-04T00:00:00Z",
+    "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK25501/"
+  }
+}

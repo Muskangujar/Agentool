@@ -1,0 +1,53 @@
+{
+  "tool_id": "stripe",
+  "version": "0.1.0",
+  "base_url": "https://api.stripe.com",
+  "auth": {
+    "auth_type": "bearer",
+    "location": "header",
+    "name": "Authorization",
+    "scheme": "Bearer"
+  },
+  "rate_limit": {
+    "requests_per_second": 25
+  },
+  "methods": [
+    {
+      "name": "list_customers",
+      "description": "List all customers, optionally filtered by email.",
+      "http": { "method": "GET", "path": "/v1/customers" },
+      "params": [
+        { "name": "email",  "type": "string",  "required": false, "location": "query", "description": "Filter by exact email" },
+        { "name": "limit",  "type": "integer", "required": false, "location": "query", "description": "Max results (1-100)" }
+      ],
+      "returns": { "type": "object", "description": "Paginated list of Customer objects" }
+    },
+    {
+      "name": "create_customer",
+      "description": "Create a new customer.",
+      "http": { "method": "POST", "path": "/v1/customers" },
+      "params": [
+        { "name": "email",       "type": "string", "required": false, "location": "body", "description": "Customer email" },
+        { "name": "name",        "type": "string", "required": false, "location": "body", "description": "Customer name" },
+        { "name": "description", "type": "string", "required": false, "location": "body", "description": "Freeform description" }
+      ],
+      "returns": { "type": "object", "description": "Created Customer object" }
+    },
+    {
+      "name": "create_payment_intent",
+      "description": "Create a PaymentIntent to collect a payment.",
+      "http": { "method": "POST", "path": "/v1/payment_intents" },
+      "params": [
+        { "name": "amount",   "type": "integer", "required": true,  "location": "body", "description": "Amount in smallest currency unit (e.g. cents)" },
+        { "name": "currency", "type": "string",  "required": true,  "location": "body", "description": "Three-letter ISO currency code (e.g. usd)" }
+      ],
+      "returns": { "type": "object", "description": "Created PaymentIntent object" }
+    }
+  ],
+  "components": {},
+  "provenance": {
+    "source": "openapi",
+    "fetched_at": "2026-06-04T00:00:00Z",
+    "source_url": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json"
+  }
+}

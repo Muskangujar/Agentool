@@ -4,5 +4,11 @@ __pycache__/
 *.dylib
 *.so
 .claude/
-node_modules/
-target/
+.gemini/
+.venv/
+.pytest_cache/
+dist/
+**/dist/
+package-lock.json
+Cargo.lock
+uv.lock
