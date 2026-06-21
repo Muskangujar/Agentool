@@ -1,0 +1,31 @@
+name: Core Test
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install libxml2 and pkg-config
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-dev pkg-config
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: core -> target
+
+    - name: Cargo Test
+      run: cargo test --verbose
+      working-directory: core

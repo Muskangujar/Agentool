@@ -1,0 +1,29 @@
+name: TypeScript SDK Build
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: sdk/typescript/package.json
+
+    - name: Install dependencies
+      run: npm ci || npm install
+      working-directory: sdk/typescript
+
+    - name: Compile and Build
+      run: npm run build
+      working-directory: sdk/typescript

@@ -1,0 +1,68 @@
+{
+  "tool_id": "github",
+  "version": "0.1.0",
+  "base_url": "https://api.github.com",
+  "auth": {
+    "auth_type": "bearer",
+    "location": "header",
+    "name": "Authorization",
+    "scheme": "Bearer"
+  },
+  "rate_limit": {
+    "requests_per_second": 30
+  },
+  "methods": [
+    {
+      "name": "search_repositories",
+      "description": "Search for repositories by keyword, language, stars, etc.",
+      "http": { "method": "GET", "path": "/search/repositories" },
+      "params": [
+        { "name": "q",     "type": "string",  "required": true,  "location": "query", "description": "Search query (e.g. 'machine learning language:python')" },
+        { "name": "sort",  "type": "string",  "required": false, "location": "query", "description": "Sort by: stars, forks, help-wanted-issues, updated" },
+        { "name": "order", "type": "string",  "required": false, "location": "query", "description": "asc or desc" },
+        { "name": "per_page", "type": "integer", "required": false, "location": "query", "description": "Results per page (max 100)" }
+      ],
+      "returns": { "type": "object", "description": "Search result with total_count and items[]" }
+    },
+    {
+      "name": "get_repo",
+      "description": "Get a specific repository by owner and name.",
+      "http": { "method": "GET", "path": "/repos/{owner}/{repo}" },
+      "params": [
+        { "name": "owner", "type": "string", "required": true, "location": "path", "description": "Repository owner" },
+        { "name": "repo",  "type": "string", "required": true, "location": "path", "description": "Repository name" }
+      ],
+      "returns": { "type": "object", "description": "Full repository object" }
+    },
+    {
+      "name": "list_issues",
+      "description": "List issues for a repository.",
+      "http": { "method": "GET", "path": "/repos/{owner}/{repo}/issues" },
+      "params": [
+        { "name": "owner",  "type": "string",  "required": true,  "location": "path",  "description": "Repository owner" },
+        { "name": "repo",   "type": "string",  "required": true,  "location": "path",  "description": "Repository name" },
+        { "name": "state",  "type": "string",  "required": false, "location": "query", "description": "open, closed, or all" },
+        { "name": "labels", "type": "string",  "required": false, "location": "query", "description": "Comma-separated label names" }
+      ],
+      "returns": { "type": "array", "description": "List of issue objects" }
+    },
+    {
+      "name": "create_issue",
+      "description": "Create an issue in a repository.",
+      "http": { "method": "POST", "path": "/repos/{owner}/{repo}/issues" },
+      "params": [
+        { "name": "owner", "type": "string", "required": true,  "location": "path", "description": "Repository owner" },
+        { "name": "repo",  "type": "string", "required": true,  "location": "path", "description": "Repository name" },
+        { "name": "title", "type": "string", "required": true,  "location": "body", "description": "Issue title" },
+        { "name": "body",  "type": "string", "required": false, "location": "body", "description": "Issue body (markdown)" }
+      ],
+      "returns": { "type": "object", "description": "Created issue object" }
+    }
+  ],
+  "components": {},
+  "provenance": {
+    "source": "openapi",
+    "fetched_at": "2026-06-04T00:00:00Z",
+    "source_url": "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+  }
+}
