@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 from agentool import Tool
 
+DUMMY_SPEC_URL = f"file://{os.path.abspath(os.path.join(os.path.dirname(__file__), 'dummy_openapi.json'))}"
+
 
 # ── AgentID Integration ──────────────────────────────────────────────────────
 
@@ -14,49 +16,65 @@ from agentool import Tool
 class TestAgentIDIntegration:
     def test_call_without_identity_skips_auth(self):
         """Tool with no identity should call without injecting credentials."""
-        tool = Tool("https://api.github.com")
-        result = tool.call("search_repositories", query="test")
-        assert result["auth"] is None
+        tool = Tool(DUMMY_SPEC_URL)
+        mock_schema = MagicMock()
+        mock_schema.call_blocking.return_value = '{"status": "ok"}'
+        tool._native_schema = mock_schema
+        tool._extract_service_name = MagicMock(return_value="dummy_openapi")
+        tool.call("search_repositories", query="test")
+        mock_schema.call_blocking.assert_called_once_with("search_repositories", {"query": "test"}, None)
 
     def test_call_with_identity_env_credential(self):
         """Tool with identity should inject credentials from env var."""
         identity = MagicMock()
         identity.fingerprint = "ag:sha256:abc123"
 
-        with patch.dict(os.environ, {"AGENTID_CREDENTIALS_GITHUB": "ghp_faketoken123"}):
-            tool = Tool("https://api.github.com", identity=identity)
-            result = tool.call("search_repositories", query="test")
-            assert result["auth"] is not None
-            assert result["auth"]["type"] == "bearer"
-            assert result["auth"]["token"] == "ghp_faketoken123"
+        with patch.dict(os.environ, {"AGENTID_CREDENTIALS_DUMMY_OPENAPI": "ghp_faketoken123"}):
+            tool = Tool(DUMMY_SPEC_URL, identity=identity)
+            mock_schema = MagicMock()
+            mock_schema.call_blocking.return_value = '{"status": "ok"}'
+            tool._native_schema = mock_schema
+            tool._extract_service_name = MagicMock(return_value="dummy_openapi")
+            tool.call("search_repositories", query="test")
+            mock_schema.call_blocking.assert_called_once_with(
+                "search_repositories", 
+                {"query": "test"}, 
+                {"type": "bearer", "token": "ghp_faketoken123"}
+            )
 
     def test_call_with_identity_token_env(self):
         """Tool with identity should fall back to SERVICE_TOKEN env var."""
         identity = MagicMock()
         identity.fingerprint = "ag:sha256:abc123"
 
-        with patch.dict(os.environ, {"GITHUB_TOKEN": "ghp_alt_token"}, clear=False):
-            # Make sure the primary key is NOT set
-            env_copy = os.environ.copy()
-            env_copy.pop("AGENTID_CREDENTIALS_GITHUB", None)
-            with patch.dict(os.environ, env_copy, clear=True):
-                with patch.dict(os.environ, {"GITHUB_TOKEN": "ghp_alt_token"}):
-                    tool = Tool("https://api.github.com", identity=identity)
-                    result = tool.call("search_repositories", query="test")
-                    assert result["auth"]["token"] == "ghp_alt_token"
+        env_copy = os.environ.copy()
+        env_copy.pop("AGENTID_CREDENTIALS_DUMMY_OPENAPI", None)
+        with patch.dict(os.environ, env_copy, clear=True):
+            with patch.dict(os.environ, {"DUMMY_OPENAPI_TOKEN": "ghp_alt_token"}):
+                tool = Tool(DUMMY_SPEC_URL, identity=identity)
+                mock_schema = MagicMock()
+                mock_schema.call_blocking.return_value = '{"status": "ok"}'
+                tool._native_schema = mock_schema
+                tool._extract_service_name = MagicMock(return_value="dummy_openapi")
+                tool.call("search_repositories", query="test")
+                mock_schema.call_blocking.assert_called_once_with(
+                    "search_repositories", 
+                    {"query": "test"}, 
+                    {"type": "bearer", "token": "ghp_alt_token"}
+                )
 
     def test_call_with_identity_no_credentials_raises(self):
         """Tool with identity but no credentials anywhere should raise ValueError."""
         identity = MagicMock()
         identity.fingerprint = "ag:sha256:abc123"
 
-        # Clear all possible credential sources
         env = {k: v for k, v in os.environ.items()
-               if "AGENTID" not in k and "GITHUB" not in k}
+               if "AGENTID" not in k and "DUMMY_OPENAPI" not in k}
         with patch.dict(os.environ, env, clear=True):
             with patch("pathlib.Path.exists", return_value=False):
-                tool = Tool("https://api.github.com", identity=identity)
-                with pytest.raises(ValueError, match="No credentials for github"):
+                tool = Tool(DUMMY_SPEC_URL, identity=identity)
+                tool._extract_service_name = MagicMock(return_value="dummy_openapi")
+                with pytest.raises(ValueError, match="No credentials for dummy_openapi"):
                     tool.call("search_repositories", query="test")
 
     def test_call_with_identity_credentials_file(self, tmp_path):
@@ -64,24 +82,26 @@ class TestAgentIDIntegration:
         identity = MagicMock()
         identity.fingerprint = "ag:sha256:abc123"
 
-        creds_file = tmp_path / "credentials.json"
-        creds_file.write_text(json.dumps({
-            "github": "ghp_from_file_token"
-        }))
-
         env = {k: v for k, v in os.environ.items()
-               if "AGENTID" not in k and "GITHUB" not in k}
+               if "AGENTID" not in k and "DUMMY_OPENAPI" not in k}
         with patch.dict(os.environ, env, clear=True):
             with patch("pathlib.Path.home", return_value=tmp_path.parent):
-                # We need the .agentid dir structure
                 agentid_dir = tmp_path.parent / ".agentid"
                 agentid_dir.mkdir(exist_ok=True)
                 creds = agentid_dir / "credentials.json"
-                creds.write_text(json.dumps({"github": "ghp_from_file_token"}))
+                creds.write_text(json.dumps({"dummy_openapi": "ghp_from_file_token"}))
 
-                tool = Tool("https://api.github.com", identity=identity)
-                result = tool.call("search_repositories", query="test")
-                assert result["auth"]["token"] == "ghp_from_file_token"
+                tool = Tool(DUMMY_SPEC_URL, identity=identity)
+                mock_schema = MagicMock()
+                mock_schema.call_blocking.return_value = '{"status": "ok"}'
+                tool._native_schema = mock_schema
+                tool._extract_service_name = MagicMock(return_value="dummy_openapi")
+                tool.call("search_repositories", query="test")
+                mock_schema.call_blocking.assert_called_once_with(
+                    "search_repositories", 
+                    {"query": "test"}, 
+                    {"type": "bearer", "token": "ghp_from_file_token"}
+                )
 
 
 # ── AgentMem Integration ─────────────────────────────────────────────────────
@@ -93,12 +113,12 @@ class TestAgentMemIntegration:
         mem = MagicMock()
         mem.get.return_value = None  # No cache yet
 
-        tool = Tool("https://api.github.com", memory=mem)
+        tool = Tool(DUMMY_SPEC_URL, memory=mem)
 
         # Verify set() was called with the schema key
         mem.set.assert_called_once()
         call_args = mem.set.call_args
-        assert call_args[0][0] == "schema:https://api.github.com"
+        assert call_args[0][0] == f"schema:{DUMMY_SPEC_URL}"
         assert isinstance(call_args[0][1], bytes)  # Schema JSON as bytes
 
     def test_schema_loaded_from_cache(self):
@@ -107,6 +127,8 @@ class TestAgentMemIntegration:
             "tool_id": "cached_github",
             "version": "0.1.0",
             "base_url": "https://api.github.com",
+            "auth": {"type": "none"},
+            "provenance": {"source": "openapi", "fetched_at": "2026-07-04T00:00:00Z"},
             "methods": [{
                 "name": "cached_method",
                 "description": "From cache",
@@ -117,7 +139,7 @@ class TestAgentMemIntegration:
         mem = MagicMock()
         mem.get.return_value = cached_schema.encode("utf-8")
 
-        tool = Tool("https://api.github.com", memory=mem)
+        tool = Tool(DUMMY_SPEC_URL, memory=mem)
 
         # Should have loaded from cache, NOT called set()
         mem.set.assert_not_called()
@@ -128,10 +150,14 @@ class TestAgentMemIntegration:
         mem = MagicMock()
         mem.get.return_value = None  # No cache
 
-        tool = Tool("https://api.github.com", memory=mem)
+        tool = Tool(DUMMY_SPEC_URL, memory=mem)
+        mock_schema = MagicMock()
+        mock_schema.call_blocking.return_value = '{"status": "ok"}'
+        tool._native_schema = mock_schema
+        tool._extract_service_name = MagicMock(return_value="dummy_openapi")
         tool.call("search_repositories", query="test")
 
         mem.log_episode.assert_called_once()
         call_kwargs = mem.log_episode.call_args
-        assert "github" in call_kwargs.kwargs["action"]
+        assert "dummy_openapi" in call_kwargs.kwargs["action"]
         assert "search_repositories" in call_kwargs.kwargs["action"]

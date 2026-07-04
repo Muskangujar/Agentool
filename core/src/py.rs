@@ -452,6 +452,8 @@ pub fn start_mcp_server(schema: &ToolSchemaPy, port: u16) -> PyResult<McpServerH
     // 1. Bind synchronously so the port is live before we return.
     let std_listener = std::net::TcpListener::bind(format!("0.0.0.0:{port}"))
         .map_err(|e| PyRuntimeError::new_err(format!("bind error: {e}")))?;
+    std_listener.set_nonblocking(true)
+        .map_err(|e| PyRuntimeError::new_err(format!("set_nonblocking error: {e}")))?;
 
     // 2. Record the actual (possibly ephemeral) port.
     let actual_port = std_listener

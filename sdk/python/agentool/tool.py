@@ -65,7 +65,7 @@ class Tool:
         if not (fetch_url.startswith("http://") or fetch_url.startswith("https://") or fetch_url.startswith("file://")):
             fetch_url = "https://" + fetch_url
 
-        from agentool._native import parse_openapi_url, infer_from_html_py, schema_to_json
+        from agentool._native import parse_openapi_url, infer_from_html, schema_to_json
 
         try:
             native_schema = parse_openapi_url(fetch_url)
@@ -79,7 +79,7 @@ class Tool:
                 )
                 with urllib.request.urlopen(req, timeout=10) as response:
                     html_content = response.read().decode('utf-8', errors='ignore')
-                native_schema = infer_from_html_py(fetch_url, html_content)
+                native_schema = infer_from_html(fetch_url, html_content)
             except Exception as e:
                 raise ValueError(f"Failed to fetch or infer schema from '{self.url}': {e}")
 

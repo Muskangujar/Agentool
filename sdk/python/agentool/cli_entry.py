@@ -68,7 +68,7 @@ def _cmd_wrap(args):
     try:
         from agentool._native import (
             parse_openapi_url,
-            infer_from_html_py,
+            infer_from_html,
             schema_to_json,
         )
     except ImportError:
@@ -95,7 +95,7 @@ def _cmd_wrap(args):
             )
             with urllib.request.urlopen(req, timeout=15) as response:
                 html_content = response.read().decode("utf-8", errors="ignore")
-            native_schema = infer_from_html_py(url, html_content)
+            native_schema = infer_from_html(url, html_content)
         except Exception as e:
             print(f"Error: Failed to wrap '{args.url}': {e}", file=sys.stderr)
             sys.exit(1)
